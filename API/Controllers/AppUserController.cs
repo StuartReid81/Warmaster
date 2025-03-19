@@ -4,9 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
-    [Route("api/users")]
-    [ApiController]
-    public class AppUserController(WarmasterContext db) : ControllerBase
+    public class UsersController(WarmasterContext db) : BaseAPIController
     {
         public WarmasterContext db { get; } = db;
 

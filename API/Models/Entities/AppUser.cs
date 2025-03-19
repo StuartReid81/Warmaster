@@ -1,5 +1,5 @@
 
-namespace Warmaster.Models;
+namespace API.Models;
 
 public class AppUser
 {
@@ -8,4 +8,8 @@ public class AppUser
     public required string UserName { get; set; }
 
     public bool IsDeleted { get; set; }
+
+    public required byte[] PasswordHash { get; set; }
+
+    public required byte[] PasswordSalt { get; set; }
 }

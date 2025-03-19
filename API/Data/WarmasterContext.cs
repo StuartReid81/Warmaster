@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Warmaster.Models;
+using API.Models;
 
 namespace API.Data;
 
