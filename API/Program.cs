@@ -1,4 +1,6 @@
 using API.Data;
+using API.Interfaces;
+using API.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +12,7 @@ builder.Services.AddDbContext<WarmasterContext>(opt => {
 });
 
 builder.Services.AddCors();
+builder.Services.AddScoped<IJWTService, JWTService>();
 
 var app = builder.Build();
 

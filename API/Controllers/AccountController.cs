@@ -5,10 +5,13 @@ using Microsoft.AspNetCore.Mvc;
 using API.Models;
 using API.DTOs;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using API.Interfaces;
+using API.Services;
 
 namespace API.Controllers;
 
-public class AccountController(WarmasterContext db) : BaseAPIController {
+public class AccountController(WarmasterContext db, IJWTService tokenService) : BaseAPIController {
 
     [HttpPost("user/register")]
     public async Task<ActionResult<AppUser>> RegisterUser(DoRegisterUserDTO dto) {
@@ -44,6 +47,32 @@ public class AccountController(WarmasterContext db) : BaseAPIController {
             return BadRequest(ex.Message);
         }
     } 
+
+    [HttpPost("user/login")]
+    public async Task<ActionResult<AppUser>> DoLogin(DoLoginDTO dto) {
+        //grab user - we don't need to track as no changes will be made
+        var user = await db.Users.Where(x => x.UserName.ToLower() == dto.UserName.ToLower()).AsNoTracking().FirstOrDefaultAsync();
+
+        //null check 
+        if(user is null) return Unauthorized("Sorry but we are unable to log you in.");
+
+        //create hmac for hashing pw
+        using var hmac = new HMACSHA512(user.PasswordSalt);
+
+        //hash entered password
+        var enteredPasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(dto.Password));
+
+        //loop through hash and check to ensure is matches
+        for (int i = 0; i < user.PasswordHash.Length; i++)
+        {
+            if(user.PasswordHash[i] != enteredPasswordHash[i]) return Unauthorized("Sorry but we are unable to log you in.");
+        } 
+
+        var token = tokenService.CreateToken(user);
+
+        //return user 
+        return Ok(user);
+    }
 
     private async Task<bool> UserExists(string userName) {
         //check if username is already in the database
