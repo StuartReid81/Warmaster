@@ -1,9 +1,11 @@
 using API.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
+    [Authorize]
     public class UsersController(WarmasterContext db) : BaseAPIController
     {
         public WarmasterContext db { get; } = db;

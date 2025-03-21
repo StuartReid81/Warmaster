@@ -18,3 +18,8 @@ public class DoLoginDTO(){
     [Required]
     public required string Password { get; set; }
 }
+
+public class UserDTO {
+    public required string UserName { get; set; }
+    public required string Token { get; set; }
+}

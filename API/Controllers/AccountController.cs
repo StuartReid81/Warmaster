@@ -14,7 +14,7 @@ namespace API.Controllers;
 public class AccountController(WarmasterContext db, IJWTService tokenService) : BaseAPIController {
 
     [HttpPost("user/register")]
-    public async Task<ActionResult<AppUser>> RegisterUser(DoRegisterUserDTO dto) {
+    public async Task<ActionResult<UserDTO>> RegisterUser(DoRegisterUserDTO dto) {
         //check for existing user with same username
         if(await UserExists(dto.UserName)) return BadRequest("This username is taken");
         
@@ -41,7 +41,10 @@ public class AccountController(WarmasterContext db, IJWTService tokenService) : 
             }
 
             //else return OK with user
-            return Ok(user);
+            return Ok(new UserDTO {
+                UserName = user.UserName,
+                Token = tokenService.CreateToken(user)
+            });
         } catch(Exception ex) {
             //if exception return error message
             return BadRequest(ex.Message);
@@ -49,7 +52,7 @@ public class AccountController(WarmasterContext db, IJWTService tokenService) : 
     } 
 
     [HttpPost("user/login")]
-    public async Task<ActionResult<AppUser>> DoLogin(DoLoginDTO dto) {
+    public async Task<ActionResult<UserDTO>> DoLogin(DoLoginDTO dto) {
         //grab user - we don't need to track as no changes will be made
         var user = await db.Users.Where(x => x.UserName.ToLower() == dto.UserName.ToLower()).AsNoTracking().FirstOrDefaultAsync();
 
@@ -68,10 +71,11 @@ public class AccountController(WarmasterContext db, IJWTService tokenService) : 
             if(user.PasswordHash[i] != enteredPasswordHash[i]) return Unauthorized("Sorry but we are unable to log you in.");
         } 
 
+        //create token
         var token = tokenService.CreateToken(user);
 
         //return user 
-        return Ok(user);
+        return Ok(new UserDTO() { Token = token, UserName = user.UserName });
     }
 
     private async Task<bool> UserExists(string userName) {

@@ -1,24 +1,19 @@
-using API.Data;
-using API.Interfaces;
-using API.Services;
-using Microsoft.EntityFrameworkCore;
+using API.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddApplicationServices(builder.Configuration);
 
-builder.Services.AddDbContext<WarmasterContext>(opt => {
-    opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
-
-builder.Services.AddCors();
-builder.Services.AddScoped<IJWTService, JWTService>();
+builder.Services.AddIdentityServices(builder.Configuration);
 
 var app = builder.Build();
 
 app.UseCors(x => x.AllowAnyHeader()
                   .AllowAnyMethod()
                   .WithOrigins("http://localhost:4200", "https://localhost:4200"));
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 
