@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
-    [Authorize]
+    [AllowAnonymous]
     public class UsersController(WarmasterContext db) : BaseAPIController
     {
         public WarmasterContext db { get; } = db;
